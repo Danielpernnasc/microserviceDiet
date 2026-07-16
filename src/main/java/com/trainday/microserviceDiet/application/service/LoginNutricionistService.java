@@ -10,7 +10,7 @@ import com.trainday.microserviceDiet.models.LoginNutri;
 import com.trainday.microserviceDiet.models.Nutricionist;
 import com.trainday.microserviceDiet.models.enums.Role;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -39,9 +39,9 @@ public class LoginNutricionistService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public LoginNutriResponse createLogin(RegisterNutricionistReq request){
+    public LoginNutriResponse createLogin(RegisterNutricionistReq request) {
 
-        if(loginNutricionistRepository.existsByCrn(request.crn()) || loginNutricionistRepository.existsByEmail(request.email())){
+        if (loginNutricionistRepository.existsByCrn(request.crn()) || loginNutricionistRepository.existsByEmail(request.email())) {
             throw new RuntimeException("CRN or Email already exists");
         }
 
@@ -54,10 +54,14 @@ public class LoginNutricionistService {
 
         LoginNutri saved = loginNutricionistRepository.save(login);
 
+
         return new LoginNutriResponse(
                 saved.getId(),
                 saved.getEmail(),
-                saved.getCrn());
+                saved.getCrn(),
+                saved.getRole().getState()
+        );
+
     }
 
     public String authenticate(LoginRequest request){
@@ -84,21 +88,21 @@ public class LoginNutricionistService {
             throw e;
         }
 
-        Optional<Nutricionist> phyEdProf = nutricionistRepository.findByCrn((login.getCrn()));
+        Optional<Nutricionist> nutri = nutricionistRepository.findByCrn((login.getCrn()));
 
-        String professionalId = phyEdProf
+        String professionalId = nutri
                 .map(Nutricionist::getId)
                 .orElse(null);
 
-        Role role = phyEdProf
+        Role role = nutri
                 .map(Nutricionist::getRole)
-                .orElse(Role.PERSONAL_TRAINER);
+                .orElse(Role.NUTRICIONIST);
         return jwtService.generateToken(
                 login.getEmail(),
                 login.getCrn(),
                 login.getId(),
                 role);
-    }
+        }
     }
 
 

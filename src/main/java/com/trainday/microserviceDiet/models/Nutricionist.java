@@ -23,4 +23,5 @@ public class Nutricionist {
     private String address;
     private String crn;
     private Role role;
+    private boolean active = true;
 }
