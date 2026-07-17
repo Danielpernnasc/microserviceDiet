@@ -23,7 +23,8 @@ public class SecurityConfig {
     private static final String NUTRISearch = "/Nutricionist/searchnutricionist/*";
     private static final String NutriPost = "/Nutricionist";
     private static final String NutriListALL = "/Nutricionist/ListNutri";
-    private static final String NutriUpdate = "/Nutricionist/UpdateNutri/*";
+    private static final String NutriUpdate = "/Nutricionist/UpdateNutri";
+    private static final String Nutripatch= "/Nutricionist/PatchNutri";
     private final JwtAuthFilter jwtAuthFilter;
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
@@ -47,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, NutriListALL).hasRole("NUTRICIONIST")
                         .requestMatchers(HttpMethod.POST, NutriPost).hasRole("NUTRICIONIST")
                         .requestMatchers(HttpMethod. PUT, NutriUpdate).hasRole("NUTRICIONIST")
+                        .requestMatchers(HttpMethod.PATCH, Nutripatch).hasRole("NUTRICIONIST")
                         .requestMatchers(HttpMethod.POST, AUTH).hasRole("NUTRICIONIST")
                         .anyRequest().authenticated()
                 )

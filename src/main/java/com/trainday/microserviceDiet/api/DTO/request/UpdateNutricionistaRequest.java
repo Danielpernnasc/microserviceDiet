@@ -9,10 +9,8 @@ public record UpdateNutricionistaRequest(
         LocalDate bornDate,
         String cpf,
         String phone,
-        String address,
-        Boolean active,
-        String crn,
         String email,
-        String password
+        String address,
+        Boolean active
 ) {
 }

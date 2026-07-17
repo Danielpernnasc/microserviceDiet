@@ -90,22 +90,71 @@ public class nutricionistaService {
     }
 
     public Nutricionist updateStatus(String crn, UpdateNutricionistaRequest req){
+        System.out.println("Email recebido = [" + crn + "]");
 
+        nutricionistRepository.findAll().forEach(n ->
+                System.out.println("Banco -> " + n.getEmail())
+        );
 
-        Nutricionist nutri = nutricionistRepository.findByCrn(crn)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Nutricionist nutri = nutricionistRepository.findByEmail(crn)
+                .orElseThrow(() -> new RuntimeException("Nutricionista não encontrado"));
 
         Optional.ofNullable(req.name()).ifPresent(nutri::setName);
+        Optional.ofNullable(req.bornDate()).ifPresent(nutri::setBornDate);
         Optional.ofNullable(req.address()).ifPresent(nutri::setAddress);
         Optional.ofNullable(req.phone()).ifPresent(nutri::setPhone);
         Optional.ofNullable(req.cpf()).ifPresent(nutri::setCpf);
-
+        Optional.ofNullable(req.active()).ifPresent(nutri::setActive);
 
         try {
             return nutricionistRepository.save(nutri);
         } catch (DuplicateKeyException e) {
             throw new RuntimeException("CREF or Email already registered");
         }
+
+    }
+
+    public Nutricionist patchStatus(String crn, UpdateNutricionistaRequest req){
+
+        System.out.println("CRN recebido = [" + crn + "]");
+
+        nutricionistRepository.findAll().forEach(n ->
+                System.out.println("Banco -> " + n.getCrn())
+        );
+        Nutricionist nutri = nutricionistRepository.findByCrn(crn)
+                .orElseThrow(() -> new RuntimeException("Nutricionist not found"));
+
+        if (req.name() != null) {
+            nutri.setName(req.name());
+        }
+
+        if (req.bornDate() != null) {
+            nutri.setBornDate(req.bornDate());
+        }
+
+        if (req.cpf() != null) {
+            nutri.setCpf(req.cpf());
+        }
+
+        if (req.phone() != null) {
+            nutri.setPhone(req.phone());
+        }
+
+        if (req.address() != null) {
+            nutri.setAddress(req.address());
+        }
+
+        if(req.active() != null){
+            nutri.setActive(req.active());
+        }
+
+        try {
+            return nutricionistRepository.save(nutri);
+        } catch (DuplicateKeyException e) {
+            throw new RuntimeException("CREF or Email already registered");
+        }
+
+
 
     }
 

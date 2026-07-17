@@ -50,14 +50,25 @@ public class NutricionistController {
         return ResponseEntity.ok(service.showAllNutri()).getBody();
     }
 
-    @PutMapping("/UpdateNutri/{crn}")
+    @PutMapping("/UpdateNutri")
     public Nutricionist updateNutri(
             @RequestBody UpdateNutricionistaRequest req,
             Authentication authentication
-            ){
+    ){
         return service.updateStatus(authentication.getName(), req);
+    }
+
+
+    @PatchMapping("/PatchNutri")
+        public Nutricionist patchNutri(
+                @RequestBody UpdateNutricionistaRequest req,
+                Authentication authentication
+                ){
+            return service.patchStatus(authentication.getName(), req);
+        }
 
     }
 
 
-}
+
+
