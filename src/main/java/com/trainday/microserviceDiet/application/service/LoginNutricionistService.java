@@ -12,7 +12,9 @@ import com.trainday.microserviceDiet.models.enums.Role;
 import org.springframework.security.authentication.AuthenticationManager;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.net.PasswordAuthentication;
 import java.util.Optional;
@@ -42,7 +44,7 @@ public class LoginNutricionistService {
     public LoginNutriResponse createLogin(RegisterNutricionistReq request) {
 
         if (loginNutricionistRepository.existsByCrn(request.crn()) || loginNutricionistRepository.existsByEmail(request.email())) {
-            throw new RuntimeException("CRN or Email already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "CRN ou e-mail já cadastrado");
         }
 
         LoginNutri login = new LoginNutri();
@@ -72,10 +74,11 @@ public class LoginNutricionistService {
             user = loginNutricionistRepository.findByCrn(request.login());
         }
 
-        LoginNutri login = user.orElseThrow(() -> new RuntimeException("User not found"));
+        LoginNutri login = user.orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não encontrado"));
 
         if(!passwordEncoder.matches(request.password(), login.getPassword())){
-            throw new RuntimeException("Invalid credentials");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Senha inválida");
         }
 
         try {
@@ -88,7 +91,7 @@ public class LoginNutricionistService {
             throw e;
         }
 
-        Optional<Nutricionist> nutri = nutricionistRepository.findByCrn((login.getCrn()));
+        Optional<Nutricionist> nutri = nutricionistRepository.findFirstByCrn(login.getCrn());
 
         String professionalId = nutri
                 .map(Nutricionist::getId)

@@ -12,7 +12,9 @@ import com.trainday.microserviceDiet.api.DTO.response.NutricionistResponse;
 import com.trainday.microserviceDiet.models.LoginNutri;
 import com.trainday.microserviceDiet.models.Nutricionist;
 import com.trainday.microserviceDiet.models.enums.Role;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,11 +32,11 @@ public class nutricionistaService {
     }
 
 
-    public Nutricionist createNutri(String email, NutriRequest req){
-        LoginNutri user = loginNutricionistRepository.findByEmail(email)
+    public Nutricionist createNutri(String crn, NutriRequest req){
+        LoginNutri user = loginNutricionistRepository.findByCrn(crn)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        if(nutricionistRepository.findByCrn(email).isPresent()){
-            throw new RuntimeException("CRN already registered");
+        if(nutricionistRepository.findFirstByCrn(user.getCrn()).isPresent()){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Este login já possui um nutricionista cadastrado");
         }
 
         Nutricionist nutri = new Nutricionist();
@@ -96,7 +98,7 @@ public class nutricionistaService {
                 System.out.println("Banco -> " + n.getEmail())
         );
 
-        Nutricionist nutri = nutricionistRepository.findByEmail(crn)
+        Nutricionist nutri = nutricionistRepository.findByCrn(crn)
                 .orElseThrow(() -> new RuntimeException("Nutricionista não encontrado"));
 
         Optional.ofNullable(req.name()).ifPresent(nutri::setName);
@@ -153,8 +155,6 @@ public class nutricionistaService {
         } catch (DuplicateKeyException e) {
             throw new RuntimeException("CREF or Email already registered");
         }
-
-
 
     }
 

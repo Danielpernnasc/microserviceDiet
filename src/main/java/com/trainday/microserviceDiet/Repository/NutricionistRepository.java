@@ -11,4 +11,6 @@ public interface NutricionistRepository extends MongoRepository<Nutricionist, St
     Optional<Nutricionist> findByEmail(String email);
 
     Optional<Nutricionist> findByCrn(String crn);
+
+    Optional<Nutricionist> findFirstByCrn(String crn);
 }

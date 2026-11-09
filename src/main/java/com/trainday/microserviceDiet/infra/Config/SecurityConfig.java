@@ -42,6 +42,7 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/actuator/**",
+                                "/error",
                                 "/auth/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, NUTRISearch).hasRole("NUTRICIONIST")
@@ -49,7 +50,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, NutriPost).hasRole("NUTRICIONIST")
                         .requestMatchers(HttpMethod. PUT, NutriUpdate).hasRole("NUTRICIONIST")
                         .requestMatchers(HttpMethod.PATCH, Nutripatch).hasRole("NUTRICIONIST")
-                        .requestMatchers(HttpMethod.POST, AUTH).hasRole("NUTRICIONIST")
+                        .requestMatchers(HttpMethod.POST, AUTH).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
