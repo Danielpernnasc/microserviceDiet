@@ -1,6 +1,8 @@
 package com.trainday.microserviceDiet.infra.Security;
 
 import com.trainday.microserviceDiet.infra.Config.SecurityConfig;
+import com.trainday.microserviceDiet.api.Controller.CsrfController;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,6 +30,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -42,6 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest
 @ContextConfiguration(classes = {
         SecurityConfig.class,
+        CsrfController.class,
         SecurityConfigTest.TestBeans.class
 })
 @EnableAutoConfiguration(exclude = {
@@ -66,6 +70,7 @@ class SecurityConfigTest {
         when(jwtService.extractRole(token)).thenReturn("NUTRITIONIST");
 
         mockMvc.perform(post("/Nutritionist")
+                        .with(csrf())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertNull(result.getRequest().getSession(false)));
@@ -111,8 +116,48 @@ class SecurityConfigTest {
     })
     @DisplayName("Swagger and auth endpoints are public")
     void publicEndpointsAreAccessible(String method, String path) throws Exception {
-        mockMvc.perform(request(method, path))
+        mockMvc.perform(request(method, path).with(csrf()))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Clients can obtain a CSRF token before authenticating")
+    void csrfTokenCanBeUsedForLogin() throws Exception {
+        var result = mockMvc.perform(get("/auth/csrf"))
+                .andExpect(status().isOk())
+                .andReturn();
+        var body = new ObjectMapper().readTree(result.getResponse().getContentAsString());
+        MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false);
+        assertNotNull(session);
+
+        mockMvc.perform(post("/auth/login").session(session))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/auth/login").session(session)
+                        .header(body.get("headerName").asText(), "invalid-token"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/auth/login").session(session)
+                        .header(body.get("headerName").asText(), body.get("token").asText()))
+                .andExpect(status().isNotFound());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "POST,/auth/login",
+            "POST,/auth/register",
+            "POST,/Nutritionist",
+            "PUT,/Nutritionist/UpdateNutri",
+            "PATCH,/Diet/athletediet/patch/123",
+            "DELETE,/Diet/athletediet/delete/123"
+    })
+    @DisplayName("Unsafe API requests reject missing and invalid CSRF tokens")
+    void apiRequiresCsrfTokens(String method, String path) throws Exception {
+        mockMvc.perform(request(method, path)
+                        .with(user("nutritionist").roles("NUTRITIONIST")))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(request(method, path)
+                        .with(user("nutritionist").roles("NUTRITIONIST"))
+                        .with(csrf().useInvalidToken()))
+                .andExpect(status().isForbidden());
     }
 
     @ParameterizedTest
@@ -150,9 +195,11 @@ class SecurityConfigTest {
             mockMvc.perform(request(endpoint.method(), endpoint.path()))
                     .andExpect(status().isForbidden());
             mockMvc.perform(request(endpoint.method(), endpoint.path())
+                            .with(csrf())
                             .with(user("nutritionist").roles("NUTRITIONIST")))
                     .andExpect(status().isNotFound());
             mockMvc.perform(request(endpoint.method(), endpoint.path())
+                            .with(csrf())
                             .with(user("athlete").roles("ATHLETE")))
                     .andExpect(status().isForbidden());
         }
