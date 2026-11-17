@@ -13,8 +13,13 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -22,7 +27,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -46,6 +53,40 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class SecurityConfigTest {
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private com.trainday.microserviceDiet.infra.service.JwtService jwtService;
+
+    @Test
+    @DisplayName("API authenticates Bearer tokens without creating or retaining a session")
+    void bearerAuthenticationIsStateless() throws Exception {
+        String token = "stateless-test-token";
+        when(jwtService.isTokenValid(token)).thenReturn(true);
+        when(jwtService.extractSubject(token)).thenReturn("nutritionist");
+        when(jwtService.extractRole(token)).thenReturn("NUTRITIONIST");
+
+        mockMvc.perform(post("/Nutritionist")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertNull(result.getRequest().getSession(false)));
+
+        mockMvc.perform(get("/Nutritionist/ListNutri"))
+                .andExpect(status().isForbidden())
+                .andExpect(result -> assertNull(result.getRequest().getSession(false)));
+    }
+
+    @Test
+    @DisplayName("API ignores authentication stored in an HTTP session")
+    void sessionAuthenticationIsIgnored() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        var authentication = UsernamePasswordAuthenticationToken.authenticated(
+                "nutritionist", null, List.of(new SimpleGrantedAuthority("ROLE_NUTRITIONIST")));
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                new SecurityContextImpl(authentication));
+
+        mockMvc.perform(get("/Nutritionist/ListNutri").session(session))
+                .andExpect(status().isForbidden());
+    }
 
     @ParameterizedTest
     @CsvSource({

@@ -4,10 +4,14 @@ import com.trainday.microserviceDiet.models.LoginNutri;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 
 public class UserDetailImpl implements UserDetails {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final LoginNutri login;
 
     public UserDetailImpl(LoginNutri login) {
