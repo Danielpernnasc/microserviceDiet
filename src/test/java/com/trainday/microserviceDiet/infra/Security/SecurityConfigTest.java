@@ -23,6 +23,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -49,14 +50,32 @@ class SecurityConfigTest {
     @ParameterizedTest
     @CsvSource({
             "GET,/swagger-ui.html",
+            "GET,/swagger-ui/index.html",
             "GET,/v3/api-docs",
+            "GET,/v3/api-docs/swagger-config",
             "GET,/swagger-resources",
+            "GET,/webjars/swagger-ui/index.html",
             "POST,/auth/login",
             "POST,/auth/register"
     })
     @DisplayName("Swagger and auth endpoints are public")
     void publicEndpointsAreAccessible(String method, String path) throws Exception {
         mockMvc.perform(request(method, path))
+                .andExpect(status().isNotFound());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "POST,/v3/api-docs",
+            "PUT,/swagger-ui/index.html",
+            "PATCH,/swagger-resources",
+            "DELETE,/webjars/swagger-ui/index.html"
+    })
+    @DisplayName("Swagger endpoints require CSRF tokens for unsafe methods")
+    void swaggerEndpointsRequireCsrfTokens(String method, String path) throws Exception {
+        mockMvc.perform(request(method, path))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(request(method, path).with(csrf()))
                 .andExpect(status().isNotFound());
     }
 
