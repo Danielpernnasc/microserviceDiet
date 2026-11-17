@@ -56,7 +56,7 @@ public class SecurityConfig {
 
         http
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Authentication uses Bearer tokens in the Authorization header, not session cookies.
+                // Authentication uses the Authorization header, not session cookies.
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(

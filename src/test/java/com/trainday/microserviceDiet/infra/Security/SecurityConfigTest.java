@@ -76,6 +76,16 @@ class SecurityConfigTest {
     }
 
     @Test
+    @DisplayName("Unlisted API endpoints still require authentication")
+    void unlistedEndpointsRequireAuthentication() throws Exception {
+        mockMvc.perform(get("/private/unlisted"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/private/unlisted")
+                        .with(user("nutritionist").roles("NUTRITIONIST")))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     @DisplayName("API ignores authentication stored in an HTTP session")
     void sessionAuthenticationIsIgnored() throws Exception {
         MockHttpSession session = new MockHttpSession();
