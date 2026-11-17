@@ -2,13 +2,10 @@ package com.trainday.microserviceDiet.api.Controller;
 
 
 import com.trainday.microserviceDiet.api.DTO.request.NutriRequest;
-import com.trainday.microserviceDiet.api.DTO.request.RegisterNutricionistReq;
-import com.trainday.microserviceDiet.api.DTO.request.UpdateNutricionistaRequest;
-import com.trainday.microserviceDiet.api.DTO.response.NutricionistResponse;
-import com.trainday.microserviceDiet.application.service.nutricionistaService;
-import com.trainday.microserviceDiet.models.Nutricionist;
+import com.trainday.microserviceDiet.api.DTO.response.NutritionistResponse;
+import com.trainday.microserviceDiet.application.service.NutritionistService;
+import com.trainday.microserviceDiet.models.Nutritionist;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.springframework.data.mongodb.repository.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,42 +14,42 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/Nutricionist")
+@RequestMapping("/Nutritionist")
 @SecurityRequirement(name = "bearerAuth")
-public class NutricionistController {
+public class NutritionistController {
 
-    private final nutricionistaService service;
+    private final NutritionistService service;
 
-    public NutricionistController(nutricionistaService service) {
+    public NutritionistController(NutritionistService service) {
         this.service= service;
     }
 
     @PostMapping
-    public ResponseEntity<Nutricionist> save(
+    public ResponseEntity<Nutritionist> save(
             @RequestBody NutriRequest req,
             Authentication authentication
             ){
         System.out.println("ENTROU NO CONTROLLER");
         String crn = authentication.getName();
-        Nutricionist createdNutri = service.createNutri(crn, req);
+        Nutritionist createdNutri = service.createNutri(crn, req);
         return  ResponseEntity.status(HttpStatus.CREATED)
                 .body(createdNutri);
     }
 
-    @GetMapping("/searchnutricionist/{crn}")
-    public ResponseEntity<NutricionistResponse> getNutricionistByCrn(
+    @GetMapping("/searchnutritionist/{crn}")
+    public ResponseEntity<NutritionistResponse> getNutritionistByCrn(
             @PathVariable String crn) {
-        return ResponseEntity.ok(service.searchNutricionist(crn));
+        return ResponseEntity.ok(service.searchNutritionist(crn));
     }
 
     @GetMapping("/ListNutri")
-    public List<NutricionistResponse> getAllNutriRegistred(){
+    public List<NutritionistResponse> getAllNutriRegistred(){
         return ResponseEntity.ok(service.showAllNutri()).getBody();
     }
 
     @PutMapping("/UpdateNutri")
-    public Nutricionist updateNutri(
-            @RequestBody UpdateNutricionistaRequest req,
+    public Nutritionist updateNutri(
+            @RequestBody NutriRequest req,
             Authentication authentication
     ){
         return service.updateStatus(authentication.getName(), req);
@@ -60,8 +57,8 @@ public class NutricionistController {
 
 
     @PatchMapping("/PatchNutri")
-        public Nutricionist patchNutri(
-                @RequestBody UpdateNutricionistaRequest req,
+        public Nutritionist patchNutri(
+                @RequestBody NutriRequest req,
                 Authentication authentication
                 ){
             return service.patchStatus(authentication.getName(), req);

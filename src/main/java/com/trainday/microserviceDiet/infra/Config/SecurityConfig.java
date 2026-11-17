@@ -22,11 +22,16 @@ import static org.springframework.security.web.util.matcher.RegexRequestMatcher.
 @Configuration
 public class SecurityConfig {
     private static final String AUTH = "/auth/*";
-    private static final String NUTRISearch = "/Nutricionist/searchnutricionist/*";
-    private static final String NutriPost = "/Nutricionist";
-    private static final String NutriListALL = "/Nutricionist/ListNutri";
-    private static final String NutriUpdate = "/Nutricionist/UpdateNutri";
-    private static final String Nutripatch= "/Nutricionist/PatchNutri";
+    private static final String NUTRISearch = "/Nutritionist/searchnutritionist/*";
+    private static final String NutriPost = "/Nutritionist";
+    private static final String NutriListALL = "/Nutritionist/ListNutri";
+    private static final String NutriUpdate = "/Nutritionist/UpdateNutri";
+    private static final String Nutripatch= "/Nutritionist/PatchNutri";
+    private static final String DietPost = "/Diet/athletediet/post";
+    private static final String DietGet  = "/Diet/athletediet/get/*";
+    private static final String DietPatch  = "/Diet/athletediet/patch/*";
+    private static final String DietPut  = "/Diet/athletediet/put/*";
+    private static final String DietDelete  = "/Diet/athletediet/delete/*";
     private final JwtAuthFilter jwtAuthFilter;
 
 
@@ -59,11 +64,16 @@ public class SecurityConfig {
                                 "/error",
                                 "/auth/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, NUTRISearch).hasRole("NUTRICIONIST")
-                        .requestMatchers(HttpMethod.GET, NutriListALL).hasRole("NUTRICIONIST")
-                        .requestMatchers(HttpMethod.POST, NutriPost).hasRole("NUTRICIONIST")
-                        .requestMatchers(HttpMethod. PUT, NutriUpdate).hasRole("NUTRICIONIST")
-                        .requestMatchers(HttpMethod.PATCH, Nutripatch).hasRole("NUTRICIONIST")
+                        .requestMatchers(HttpMethod.GET, NUTRISearch).hasRole("NUTRITIONIST")
+                        .requestMatchers(HttpMethod.GET, NutriListALL).hasRole("NUTRITIONIST")
+                        .requestMatchers(HttpMethod.POST, NutriPost).hasRole("NUTRITIONIST")
+                        .requestMatchers(HttpMethod. PUT, NutriUpdate).hasRole("NUTRITIONIST")
+                        .requestMatchers(HttpMethod.PATCH, Nutripatch).hasRole("NUTRITIONIST")
+                        .requestMatchers(HttpMethod.POST, DietPost).hasRole("NUTRITIONIST")
+                        .requestMatchers(HttpMethod.GET, DietGet).hasRole("NUTRITIONIST")
+                        .requestMatchers(HttpMethod.PATCH, DietPatch).hasRole("NUTRITIONIST")
+                        .requestMatchers(HttpMethod.PUT, DietPut).hasRole("NUTRITIONIST")
+                        .requestMatchers(HttpMethod.DELETE, DietDelete).hasRole("NUTRITIONIST")
                         .requestMatchers(HttpMethod.POST, AUTH).permitAll()
                         .anyRequest().authenticated()
                 )

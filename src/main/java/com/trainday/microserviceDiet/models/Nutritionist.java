@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Nutricionist {
+public class Nutritionist {
     private String id;
     private String name;
     private String email;

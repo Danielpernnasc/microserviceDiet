@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
 
-public interface LoginNutricionistRepository extends MongoRepository<LoginNutri, String> {
+public interface LoginNutritionistRepository extends MongoRepository<LoginNutri, String> {
     Optional<LoginNutri> findByCrn(String crn);
 
     Optional<LoginNutri> findByEmail(String email);

@@ -1,6 +1,6 @@
 package com.trainday.microserviceDiet.infra.service;
 
-import com.trainday.microserviceDiet.Repository.LoginNutricionistRepository;
+import com.trainday.microserviceDiet.Repository.LoginNutritionistRepository;
 import com.trainday.microserviceDiet.models.LoginNutri;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,10 +12,10 @@ import java.util.Optional;
 
 @Service
 public class LoginUserDetailsService implements UserDetailsService {
-    private final LoginNutricionistRepository repository;
+    private final LoginNutritionistRepository repository;
     private final static String Professional_not_found = "Professional not found";
 
-    public LoginUserDetailsService(LoginNutricionistRepository repository) {
+    public LoginUserDetailsService(LoginNutritionistRepository repository) {
         this.repository = repository;
     }
 

@@ -27,6 +27,9 @@ public class Diet {
 
 
     private String nutritionistId;
+    private String crn;
+    private Role roleprofessional;
+    private String nameProfessional;
 
     private String title; // Ex: Cutting, Bulking, Manutenção
 
