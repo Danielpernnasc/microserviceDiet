@@ -40,7 +40,7 @@ public class JwtAuthFilter  extends OncePerRequestFilter {
                 || path.startsWith("/webjars");
     }
 
-
+    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)

@@ -14,6 +14,6 @@ import java.util.List;
 @Builder
 public class DietSchedule {
     private DayOfWeek day;
-
     private List<Meal> meals;
 }
+

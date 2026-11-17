@@ -42,19 +42,15 @@ public class JwtService {
         claims.put("email", email);
         claims.put("professionalId", professionalId);
         claims.put("role", role.name());
-
+        System.out.println("Subject = " + crn);
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(email)
+                .setSubject(crn)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-
-
-
-
 
     public String extractSubject(String token) {
         return extractAllClaims(token).getSubject();
