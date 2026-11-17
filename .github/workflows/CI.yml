@@ -1,8 +1,7 @@
-name: CI
+name: SonarCloud
 
 on:
   pull_request:
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -24,11 +23,8 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Make Maven wrapper executable
-        run: chmod +x ./mvnw
-
       - name: Run tests, enforce coverage, and analyze
-        run: ./mvnw -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.qualitygate.wait=true
+        run: ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.qualitygate.wait=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUBDIETSERVICE_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
