@@ -9,14 +9,20 @@ import com.trainday.microserviceDiet.api.DTO.request.MealRequest;
 import com.trainday.microserviceDiet.infra.DTO.response.AthleteCientResponse;
 import com.trainday.microserviceDiet.infra.client.AthleteClient;
 import com.trainday.microserviceDiet.models.Diet;
+import com.trainday.microserviceDiet.models.DietSchedule;
+import com.trainday.microserviceDiet.models.Meal;
 import com.trainday.microserviceDiet.models.Nutritionist;
 import com.trainday.microserviceDiet.models.enums.Role;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -24,6 +30,8 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Collections;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -43,6 +51,44 @@ class DietaServiceTest {
     private NutritionistRepository nutritionistRepository;
     @InjectMocks
     private DietaService service;
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("scheduleValidationCases")
+    void isInvalidScheduleValidatesDayAndMeals(String description, DietSchedule schedule, boolean expected) {
+        Boolean invalid = ReflectionTestUtils.invokeMethod(service, "isInvalidSchedule", schedule);
+
+        assertEquals(Boolean.valueOf(expected), invalid);
+        verifyNoInteractions(dietRepository, athleteClient, nutritionistRepository);
+    }
+
+    private static Stream<Arguments> scheduleValidationCases() {
+        Meal validMeal = Meal.builder().time(LocalTime.of(7, 0)).name("Breakfast").build();
+        Meal mealWithoutTime = Meal.builder().name("Breakfast").build();
+        Meal mealWithoutName = Meal.builder().time(LocalTime.of(7, 0)).build();
+        Meal mealWithEmptyName = Meal.builder().time(LocalTime.of(7, 0)).name("").build();
+        Meal mealWithBlankName = Meal.builder().time(LocalTime.of(7, 0)).name(" \t ").build();
+
+        return Stream.of(
+                Arguments.of("null schedule", null, true),
+                Arguments.of("null day", new DietSchedule(null, List.of(validMeal)), true),
+                Arguments.of("null meals", new DietSchedule(DayOfWeek.MONDAY, null), true),
+                Arguments.of("empty meals", new DietSchedule(DayOfWeek.MONDAY, List.of()), true),
+                Arguments.of("null meal",
+                        new DietSchedule(DayOfWeek.MONDAY, Collections.singletonList(null)), true),
+                Arguments.of("null meal time",
+                        new DietSchedule(DayOfWeek.MONDAY, List.of(mealWithoutTime)), true),
+                Arguments.of("null meal name",
+                        new DietSchedule(DayOfWeek.MONDAY, List.of(mealWithoutName)), true),
+                Arguments.of("empty meal name",
+                        new DietSchedule(DayOfWeek.MONDAY, List.of(mealWithEmptyName)), true),
+                Arguments.of("blank meal name",
+                        new DietSchedule(DayOfWeek.MONDAY, List.of(mealWithBlankName)), true),
+                Arguments.of("invalid meal after valid meal",
+                        new DietSchedule(DayOfWeek.MONDAY, List.of(validMeal, mealWithoutName)), true),
+                Arguments.of("valid schedule",
+                        new DietSchedule(DayOfWeek.MONDAY, List.of(validMeal)), false)
+        );
+    }
 
     @Test
     void createDietSavesDietWithAthleteNutritionistAndSchedule() {
