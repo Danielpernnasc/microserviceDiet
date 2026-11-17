@@ -22,17 +22,18 @@ import static org.springframework.security.web.util.matcher.RegexRequestMatcher.
 @Configuration
 public class SecurityConfig {
     private static final String AUTH = "/auth/*";
-    private static final String NUTRISearch = "/Nutritionist/searchnutritionist/*";
-    private static final String NutriPost = "/Nutritionist";
-    private static final String NutriListALL = "/Nutritionist/ListNutri";
-    private static final String NutriUpdate = "/Nutritionist/UpdateNutri";
-    private static final String Nutripatch= "/Nutritionist/PatchNutri";
-    private static final String DietPost = "/Diet/athletediet/post";
-    private static final String DietGet  = "/Diet/athletediet/get/*";
-    private static final String DietPatch  = "/Diet/athletediet/patch/*";
-    private static final String DietPut  = "/Diet/athletediet/put/*";
-    private static final String DietDelete  = "/Diet/athletediet/delete/*";
+    private static final String NUTRI_SEARCH = "/Nutritionist/searchnutritionist/*";
+    private static final String NUTRI_POST = "/Nutritionist";
+    private static final String NUTRI_LIST_ALL = "/Nutritionist/ListNutri";
+    private static final String NUTRI_UPDATE = "/Nutritionist/UpdateNutri";
+    private static final String NUTRI_PATCH = "/Nutritionist/PatchNutri";
+    private static final String DIET_POST = "/Diet/athletediet/post";
+    private static final String DIET_GET = "/Diet/athletediet/get/*";
+    private static final String DIET_PATCH = "/Diet/athletediet/patch/*";
+    private static final String DIET_PUT = "/Diet/athletediet/put/*";
+    private static final String DIET_DELETE = "/Diet/athletediet/delete/*";
     private final JwtAuthFilter jwtAuthFilter;
+    private static final String NUTRITIONIST = "NUTRITIONIST";
 
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
@@ -63,16 +64,16 @@ public class SecurityConfig {
                                 "/error",
                                 "/auth/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, NUTRISearch).hasRole("NUTRITIONIST")
-                        .requestMatchers(HttpMethod.GET, NutriListALL).hasRole("NUTRITIONIST")
-                        .requestMatchers(HttpMethod.POST, NutriPost).hasRole("NUTRITIONIST")
-                        .requestMatchers(HttpMethod. PUT, NutriUpdate).hasRole("NUTRITIONIST")
-                        .requestMatchers(HttpMethod.PATCH, Nutripatch).hasRole("NUTRITIONIST")
-                        .requestMatchers(HttpMethod.POST, DietPost).hasRole("NUTRITIONIST")
-                        .requestMatchers(HttpMethod.GET, DietGet).hasRole("NUTRITIONIST")
-                        .requestMatchers(HttpMethod.PATCH, DietPatch).hasRole("NUTRITIONIST")
-                        .requestMatchers(HttpMethod.PUT, DietPut).hasRole("NUTRITIONIST")
-                        .requestMatchers(HttpMethod.DELETE, DietDelete).hasRole("NUTRITIONIST")
+                        .requestMatchers(HttpMethod.GET, NUTRI_SEARCH).hasRole(NUTRITIONIST)
+                        .requestMatchers(HttpMethod.GET, NUTRI_LIST_ALL).hasRole(NUTRITIONIST)
+                        .requestMatchers(HttpMethod.POST, NUTRI_POST).hasRole(NUTRITIONIST)
+                        .requestMatchers(HttpMethod. PUT, NUTRI_UPDATE).hasRole(NUTRITIONIST)
+                        .requestMatchers(HttpMethod.PATCH, NUTRI_PATCH).hasRole(NUTRITIONIST)
+                        .requestMatchers(HttpMethod.POST, DIET_POST).hasRole(NUTRITIONIST)
+                        .requestMatchers(HttpMethod.GET, DIET_GET).hasRole(NUTRITIONIST)
+                        .requestMatchers(HttpMethod.PATCH, DIET_PATCH).hasRole(NUTRITIONIST)
+                        .requestMatchers(HttpMethod.PUT, DIET_PUT).hasRole(NUTRITIONIST)
+                        .requestMatchers(HttpMethod.DELETE, DIET_DELETE).hasRole(NUTRITIONIST)
                         .requestMatchers(HttpMethod.POST, AUTH).permitAll()
                         .anyRequest().authenticated()
                 )
